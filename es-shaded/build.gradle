@@ -1,0 +1,31 @@
+plugins {
+  id "com.github.johnrengelman.shadow" version "4.0.3"
+}
+
+def es_big_version = '6'
+def es_version = '6.4.0'
+group 'com.github.harbby'
+version "${es_version}-1"
+
+dependencies {
+  compile "org.elasticsearch.client:transport:${es_version}"
+}
+
+shadowJar {
+  baseName = project.name
+  classifier = 'shaded'
+  version = project.version
+
+  configurations = [project.configurations.compile]
+
+  dependencies {
+    exclude(dependency('junit:junit:'))
+  }
+
+  //relocate 'com.google.protobuf', 'shaded.com.google.protobuf'
+  relocate 'com.google.common', "shaded.elasticsearch${es_big_version}.com.google.common"
+  relocate 'io.netty', "shaded.elasticsearch${es_big_version}.io.netty"
+  relocate 'io.netty', "shaded.elasticsearch${es_big_version}.io.netty"
+  relocate 'org.apache.logging', "shaded.elasticsearch${es_big_version}.org.apache.logging"
+}
+assemble.dependsOn shadowJar

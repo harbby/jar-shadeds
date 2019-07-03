@@ -1,0 +1,100 @@
+
+allprojects {
+  group 'com.github.harbby'
+  version '0.1.0-SNAPSHOT'  //SNAPSHOT
+
+  apply plugin: 'java'
+  apply plugin: 'maven'
+}
+
+subprojects {
+  repositories {
+    mavenLocal()
+    //maven{ url 'http://maven.aliyun.com/nexus/content/groups/public'}
+    mavenCentral()
+  }
+
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+    //javadoc.failOnError = false
+  }
+
+  artifacts {
+    archives sourcesJar, javadocJar
+  }
+
+  javadoc {
+    options {
+      encoding "UTF-8"
+      charSet 'UTF-8'
+      author true
+      version true
+      links "https://harbby.github.io/project/sylph/en/docs/intro/"
+      title "sylph"
+    }
+  }
+
+  apply plugin: 'signing'
+
+  signing {
+    sign configurations.archives
+  }
+
+  ext {
+    shouldSign = project.hasProperty('mavenUsername')
+    mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : ''
+    mavenPassword = project.hasProperty('mavenPassword') ? project.mavenPassword : ''
+  }
+
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: mavenUsername, password: mavenPassword)
+        }
+
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: mavenUsername, password: mavenPassword)
+        }
+
+        pom.project {
+          name project.name
+          packaging 'jar'
+          // optionally artifactId can be defined here
+          description 'A lightweight API test framework'
+          url 'https://github.com/harbby/sylph'
+
+          scm {
+            connection 'https://github.com/harbby/sylph.git'
+            developerConnection 'git@github.com:harbby/sylph.git'
+            url 'https://github.com/harbby/sylph'
+          }
+
+          licenses {
+            license {
+              name 'The Apache Software License, Version 2.0'
+              url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+              distribution 'repo'
+            }
+          }
+
+          developers {
+            developer {
+              id 'harbby'
+              name 'harbby'
+              email 'yezhixinghai@gmail.com'
+            }
+          }
+        }
+      }
+    }
+  }
+}
