@@ -1,6 +1,11 @@
 # jar-shadeds
 #### java jar-shadeds arrange
 
+### need:
+guava, netty, grpc...
+
+### supported:
+
 + apache hbase
 ```xml
 <dependency>
